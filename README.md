@@ -1,1 +1,2 @@
 # temirzholbiletteri
+java solo project
