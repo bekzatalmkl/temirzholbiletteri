@@ -1,0 +1,128 @@
+@startuml
+
+title RAILWAY TICKET BOOKING SYSTEM\nSEQUENCE DIAGRAM — TICKET BOOKING
+
+autonumber
+
+skinparam backgroundColor #F8FAFC
+skinparam shadowing true
+skinparam roundcorner 15
+skinparam defaultFontName Arial
+
+skinparam sequence {
+ ArrowColor #2563EB
+ LifeLineBorderColor #64748B
+ LifeLineBackgroundColor #E2E8F0
+ ParticipantBorderColor #1E3A8A
+ ParticipantBackgroundColor #DBEAFE
+ ParticipantFontColor #172554
+ ActorBorderColor #1D4ED8
+ ActorFontColor #1E3A8A
+ GroupBorderColor #0284C7
+ GroupBackgroundColor #EFF6FF
+}
+
+actor Passenger
+
+box "Railway Booking System" #EFF6FF
+boundary "Booking Interface" as UI
+control "Route Service" as RS
+control "Schedule Service" as SS
+control "Seat Allocation Service" as SAS
+control "Payment Service" as PS
+database "Railway Database" as DB
+end box
+
+Passenger -> UI : Enter departure and destination
+activate UI
+
+UI -> RS : findShortestPath(from, to)
+activate RS
+
+RS -> DB : Load station graph
+activate DB
+DB --> RS : Stations and connections
+deactivate DB
+
+RS -> RS : Execute Dijkstra algorithm
+RS --> UI : Return available route
+deactivate RS
+
+UI -> SS : searchTrains(route, date)
+activate SS
+
+SS -> DB : Find train schedules
+activate DB
+DB --> SS : Available trains
+deactivate DB
+
+SS --> UI : Display train list
+deactivate SS
+
+Passenger -> UI : Select train, wagon and seat
+
+UI -> SAS : checkAvailability(seat, from, to)
+activate SAS
+
+SAS -> DB : Check segment reservations
+activate DB
+DB --> SAS : Reservation data
+deactivate DB
+
+alt Seat is available
+
+ SAS --> UI : Seat available
+
+ UI -> SAS : createTemporaryReservation()
+ SAS -> DB : Save temporary allocation
+ activate DB
+ DB --> SAS : Reservation created
+ deactivate DB
+
+ UI -> PS : processPayment(amount)
+ activate PS
+
+ alt Payment successful
+
+  PS -> DB : Save payment
+  activate DB
+  DB --> PS : Payment confirmed
+  deactivate DB
+
+  PS --> UI : Payment successful
+
+  UI -> SAS : confirmReservation()
+  SAS -> DB : Confirm seat allocation
+  activate DB
+  DB --> SAS : Allocation confirmed
+  deactivate DB
+
+  UI -> DB : Save electronic ticket
+  activate DB
+  DB --> UI : Ticket created
+  deactivate DB
+
+  UI --> Passenger : Display electronic ticket
+
+ else Payment failed
+
+  PS --> UI : Payment rejected
+  UI -> SAS : cancelTemporaryReservation()
+  SAS -> DB : Release seat allocation
+  UI --> Passenger : Display payment error
+
+ end
+
+ deactivate PS
+
+else Seat is unavailable
+
+ SAS --> UI : Seat already reserved
+ UI --> Passenger : Select another seat
+
+end
+
+deactivate SAS
+deactivate UI
+
+@enduml

@@ -1,0 +1,124 @@
+@startuml
+
+title RAILWAY TICKET BOOKING SYSTEM\nACTIVITY DIAGRAM
+
+scale 0.75
+
+skinparam backgroundColor #F8FAFC
+skinparam shadowing true
+skinparam roundcorner 12
+skinparam defaultFontName Arial
+skinparam defaultFontSize 10
+skinparam ArrowColor #475569
+skinparam nodesep 15
+skinparam ranksep 18
+skinparam Padding 5
+
+skinparam activity {
+    BackgroundColor #DBEAFE
+    BorderColor #2563EB
+    FontColor #172554
+    DiamondBackgroundColor #FEF3C7
+    DiamondBorderColor #D97706
+    DiamondFontColor #78350F
+    StartColor #16A34A
+    EndColor #DC2626
+    BarColor #475569
+}
+
+|Passenger|
+start
+:Enter departure station;
+:Enter destination station;
+:Select travel date;
+
+|Railway System|
+:Load station graph;
+:Initialize Dijkstra algorithm;
+:Calculate shortest path;
+
+if (Route found?) then (Yes)
+    :Display available routes;
+    :Display train schedules;
+
+    |Passenger|
+    :Select train and wagon;
+    :Select seat;
+
+    |Railway System|
+    :Check seat availability;
+
+    while (Seat unavailable?) is (Yes)
+        :Display unavailable seat;
+        |Passenger|
+        :Select another seat;
+        |Railway System|
+        :Check selected seat again;
+    endwhile (No)
+
+    :Create temporary reservation;
+    :Calculate ticket price;
+
+    |Passenger|
+    :Enter passenger information;
+    :Confirm booking;
+
+    |Payment Gateway|
+    :Process payment;
+
+    if (Payment successful?) then (Yes)
+
+        |Railway System|
+        :Confirm seat allocation;
+        :Generate electronic ticket;
+        :Save ticket and payment;
+
+        |Passenger|
+        :Receive electronic ticket;
+
+        if (Return ticket?) then (Yes)
+            :Submit return request;
+
+            |Railway System|
+            :Validate ticket;
+            :Calculate refund amount;
+
+            |Payment Gateway|
+            :Process refund;
+
+            |Railway System|
+            :Update ticket status;
+            :Release seat allocation;
+            :Save refund transaction;
+
+            |Passenger|
+            :Receive refund confirmation;
+        else (No)
+            :Keep purchased ticket;
+        endif
+
+        |Administrator|
+        :Generate sales and refund reports;
+
+        |Railway System|
+        :Save report data;
+
+    else (No)
+        |Railway System|
+        :Cancel temporary reservation;
+        :Release selected seat;
+
+        |Passenger|
+        :Receive payment failure message;
+    endif
+
+else (No)
+    :Display route not found;
+
+    |Passenger|
+    :Change departure or destination;
+endif
+
+stop
+
+@enduml

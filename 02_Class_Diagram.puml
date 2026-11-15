@@ -1,0 +1,215 @@
+@startuml
+
+title RAILWAY TICKET BOOKING SYSTEM\nCLASS DIAGRAM
+
+hide circle
+top to bottom direction
+
+scale 0.85
+
+skinparam backgroundColor #F4F5FA
+skinparam shadowing true
+skinparam roundcorner 15
+skinparam classAttributeIconSize 0
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam classFontSize 12
+skinparam classAttributeFontSize 10
+skinparam classMethodFontSize 10
+skinparam packageFontSize 12
+skinparam linetype ortho
+skinparam packageStyle rectangle
+skinparam nodesep 20
+skinparam ranksep 25
+
+skinparam class {
+    BackgroundColor #E8EAF6
+    BorderColor #3949AB
+    FontColor #1A237E
+    ArrowColor #5C6BC0
+}
+
+skinparam package {
+    BackgroundColor #FFFFFF
+    BorderColor #3949AB
+    FontColor #283593
+}
+
+skinparam enum {
+    BackgroundColor #FFF3E0
+    BorderColor #EF6C00
+    FontColor #E65100
+}
+
+package "01 | ROUTE MANAGEMENT" {
+
+    class Station {
+        - stationId: Long
+        - name: String
+        - city: String
+        --
+        + getStationInfo(): String
+    }
+
+    class RouteGraph {
+        - stations: List<Station>
+        - edges: List<RouteEdge>
+        --
+        + addStation(): void
+        + addConnection(): void
+    }
+
+    class RouteEdge {
+        - distance: double
+        - travelTime: int
+    }
+
+    class DijkstraService {
+        + findShortestPath(): List<Station>
+        + calculateDistance(): double
+    }
+}
+
+package "02 | TRAIN MANAGEMENT" {
+
+    class Train {
+        - trainId: Long
+        - trainNumber: String
+        - name: String
+        --
+        + getTrainInfo(): String
+    }
+
+    class TrainSchedule {
+        - scheduleId: Long
+        - departureTime: DateTime
+        - arrivalTime: DateTime
+        --
+        + getSchedule(): void
+    }
+
+    class Wagon {
+        - wagonId: Long
+        - wagonNumber: int
+        - wagonType: WagonType
+    }
+
+    class Seat {
+        - seatId: Long
+        - seatNumber: int
+        - seatType: String
+        --
+        + getSeatInfo(): String
+    }
+
+    enum WagonType {
+        STANDARD
+        COUPE
+        PLATZKART
+        LUXURY
+    }
+}
+
+package "03 | TICKET MANAGEMENT" {
+
+    class Passenger {
+        - passengerId: Long
+        - fullName: String
+        - passportNumber: String
+        --
+        + getPassengerInfo(): String
+    }
+
+    class Ticket {
+        - ticketId: Long
+        - price: double
+        - status: TicketStatus
+        --
+        + purchase(): void
+        + returnTicket(): void
+    }
+
+    class SeatAllocation {
+        - allocationId: Long
+        - fromStationIndex: int
+        - toStationIndex: int
+        - status: String
+        --
+        + checkAvailability(): boolean
+        + reserveSeat(): void
+    }
+
+    class BookingService {
+        + bookTicket(): Ticket
+        + checkAvailability(): boolean
+    }
+
+    class Payment {
+        - paymentId: Long
+        - amount: double
+        - paymentStatus: String
+        --
+        + processPayment(): boolean
+    }
+
+    class RefundService {
+        + calculateRefund(): double
+        + refundTicket(): void
+    }
+
+    enum TicketStatus {
+        RESERVED
+        PAID
+        RETURNED
+        CANCELLED
+    }
+}
+
+package "04 | REPORTING" {
+
+    class ReportService {
+        + generateSalesReport(): void
+        + generateRefundReport(): void
+        + calculateRevenue(): double
+    }
+}
+
+RouteGraph "1" *-- "*" Station
+RouteGraph "1" *-- "*" RouteEdge
+RouteEdge "*" --> "2" Station
+DijkstraService --> RouteGraph
+
+Train "1" *-- "*" Wagon
+Wagon "1" *-- "*" Seat
+Train "1" --> "*" TrainSchedule
+
+TrainSchedule "*" --> "1" Station : departure
+TrainSchedule "*" --> "1" Station : arrival
+
+Passenger "1" --> "*" Ticket
+Ticket "1" --> "1" SeatAllocation
+SeatAllocation "*" --> "1" Seat
+SeatAllocation "*" --> "1" Station : from
+SeatAllocation "*" --> "1" Station : to
+
+BookingService --> TrainSchedule
+BookingService --> SeatAllocation
+BookingService --> Ticket
+BookingService --> Payment
+
+RefundService --> Ticket
+RefundService --> Payment
+
+ReportService --> Ticket
+ReportService --> Payment
+
+Wagon --> WagonType
+Ticket --> TicketStatus
+
+note bottom of SeatAllocation
+  A seat can be booked by different
+  passengers on non-overlapping
+  route segments.
+end note
+
+@enduml

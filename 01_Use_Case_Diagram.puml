@@ -1,0 +1,83 @@
+@startuml
+left to right direction
+
+title RAILWAY TICKET BOOKING SYSTEM\nUSE CASE DIAGRAM
+
+skinparam backgroundColor #F8FAFC
+skinparam shadowing true
+skinparam roundcorner 18
+skinparam defaultFontName Arial
+skinparam actorStyle awesome
+skinparam packageStyle rectangle
+
+skinparam usecase {
+ BackgroundColor #DBEAFE
+ BorderColor #2563EB
+ FontColor #172554
+ ArrowColor #475569
+}
+
+skinparam actor {
+ BorderColor #1D4ED8
+ FontColor #1E3A8A
+}
+
+skinparam rectangle {
+ BorderColor #203F63
+ BackgroundColor #FFFFFF
+}
+
+actor Passenger
+actor Administrator
+actor "Payment Gateway" as Payment
+
+rectangle "RAILWAY BOOKING PLATFORM" {
+
+ package "Route Management" {
+  usecase "Search Routes" as UC1
+  usecase "Find Shortest Path" as UC2
+  usecase "View Train Schedule" as UC3
+ }
+
+ package "Ticket Management" {
+  usecase "Select Train and Wagon" as UC4
+  usecase "Check Seat Availability" as UC5
+  usecase "Book Ticket" as UC6
+  usecase "Make Payment" as UC7
+  usecase "Return Ticket" as UC8
+  usecase "View Booking History" as UC9
+ }
+
+ package "Administration" {
+  usecase "Manage Stations" as UC10
+  usecase "Manage Train Routes" as UC11
+  usecase "Manage Trains and Wagons" as UC12
+  usecase "Manage Schedules" as UC13
+  usecase "Generate Sales Reports" as UC14
+  usecase "Generate Refund Reports" as UC15
+ }
+
+}
+
+Passenger --> UC1
+Passenger --> UC3
+Passenger --> UC4
+Passenger --> UC6
+Passenger --> UC8
+Passenger --> UC9
+
+Administrator --> UC10
+Administrator --> UC11
+Administrator --> UC12
+Administrator --> UC13
+Administrator --> UC14
+Administrator --> UC15
+
+Payment --> UC7
+
+UC1 ..> UC2 : <<include>>
+UC6 ..> UC5 : <<include>>
+UC6 ..> UC7 : <<include>>
+UC8 ..> UC5 : <<extend>>
+
+@enduml
